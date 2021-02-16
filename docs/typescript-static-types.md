@@ -60,7 +60,7 @@ console.log(`myResult = ${myResult}`);
 ```
 
 Se puede observar como no hemos indicado de manera explícita los tipos de la
-constante `myConst`y la variable `myResult`. Tampoco se ha explicitado el tipo
+constante `myConst` y la variable `myResult`. Tampoco se ha explicitado el tipo
 que retorna la función `add`. Dado que los tipos se utilizan correctamente,
 el compilador no detecta ningún tipo de error.
 
@@ -105,4 +105,4 @@ declare const myConst = 7;
 declare let myResult: string;
 ```
 
-## El tipo de datos `any`
+## El tipo de datos any
