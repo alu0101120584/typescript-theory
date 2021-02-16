@@ -1,2 +1,1 @@
 # Tipos de datos estáticos
-
