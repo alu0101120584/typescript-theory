@@ -1,2 +1,9 @@
 title: "Desarrollo de Sistemas Informáticos - Grado en Ingeniería Informática - ULL"
 theme: jekyll-theme-hacker
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled:     true
+  collections: false
