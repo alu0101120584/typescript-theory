@@ -5,3 +5,5 @@
 Este repositorio pretende ir almacenando los diferentes aspectos a desarrollar en
 las clases de teoría de la asignatura en lo que respecta al lenguaje de programación
 TypeScript.
+
+Para comenzar, haz clic [aquí](docs/index.md).
