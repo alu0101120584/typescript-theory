@@ -40,7 +40,6 @@ el software estuviera desplegado en un entorno de producción.
 Una posible solución, sería utilizar sentencias condicionales en la función `add` para validar los
 posibles argumentos que podría recibir dicha función en sus parámetros:
 
-
 ```javascript
 function add(num1, num2) {
   if (typeof num1 === 'number' && typeof num2 === 'number') {

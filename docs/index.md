@@ -7,4 +7,5 @@ TypeScript.
 A continuación, puede encontrar un índice de los contenidos que se están impartiendo:
 
 1. [¿Por qué debería aprender y utilizar TypeScript?](typescript-just.md)
-2. [Tipos de datos estáticos](typescript-static-types.md)
+2. [Creación de un proyecto inicial para trabajar con TypeScript](typescript-project-setup.md)
+3. [Tipos de datos estáticos](typescript-static-types.md)
