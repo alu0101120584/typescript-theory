@@ -56,12 +56,12 @@ console.log(add(1, '7'));
 ```
 
 Tal y como indicamos antes, TypeScript proporciona nuevas características y ventajas respecto
-a JavaScript que permiten desarrollar de un modo más rápido y libre de errores y una de ellas
-son los tipos estáticos que se definen mediante anotaciones de tipos. El mismo ejemplo anterior
-escrito en TypeScript sería algo como lo siguiente:
+a JavaScript que permiten desarrollar de un modo más rápido, limpio y libre de errores y, una
+de ellas, son los tipos de datos estáticos que se definen mediante anotaciones de tipos. El
+mismo ejemplo anterior escrito en TypeScript sería algo como lo siguiente:
 
 ```typescript
-function add(num1: number, num2: number) {
+function add(num1: number, num2: number): number {
     return num1 + num2;
 }
 

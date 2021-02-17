@@ -1,7 +1,10 @@
 # Creación de un proyecto inicial para trabajar con TypeScript
 
-Este apartado ilustra la creación de un proyecto inicial mínimo con el que poder
-empezar a trabajar con TypeScript.
+Esta sección ilustra la creación de un proyecto inicial mínimo con el que poder
+empezar a trabajar con TypeScript. También se describe la configuración de algunas
+herramientas que podrían ser de utilidad a la hora de desarrollar.
+
+## Gestión de dependencias y configuración del compilador de TypeScript
 
 Lo primero que haremos es abrir una terminal, ya sea a través del sistema operativo o
 de VSCode. En la misma crearemos un directorio con el nombre de nuestro proyecto:
@@ -69,6 +72,8 @@ para generarlo automáticamente y, posteriormente, proceder a editarlo:
 message TS6071: Successfully created a tsconfig.json file
 ```
 
+## Compilación y ejecución automática tras detección de cambios
+
 El siguiente paso consistirá en instalar un paquete que permitirá detectar los cambios realizados
 sobre los ficheros con código fuente en TypeScript (aquellos almacenados en el directorio `src`),
 recompilarlos para generar el código JavaScript correspondiente y ejecutarlo, todo ello de manera
@@ -121,7 +126,7 @@ denominado `index.ts` en el directorio `src` de nuestro proyecto:
 console.log("Hola Mundo");
 ```
 
-Por último, ejecutaremos el siguiente comando, el cual ejecutará el script definido en la propiedad
+Ahora, ejecutaremos el siguiente comando, el cual ejecutará el script definido en la propiedad
 `"start"` del fichero `package.json`:
 
 ```bash
@@ -139,3 +144,105 @@ Hola Mundo
 Cada vez que modifiquemos algo en el directorio `src` de nuestro proyecto, se recompilarán
 todos los ficheros con código TypeScript almacenados en dicho directorio y se ejecutará el
 fichero `index.js` generado de manera automática en el directorio `dist`.
+
+# Comprobación de sintaxis, búsqueda y resolución de problemas y aplicación de estilo en nuestro código
+
+Si quisiéramos comprobar la sintaxis de nuestro código, encontrar y solucionar problemas en
+el mismo o forzar algún tipo de estilo de programación, tendremos que utilizar un *linter*, y el más
+conocido para trabajar con JavaScript y TypeScript es [Eslint](https://eslint.org/). Para
+empezar a utilizarlo, pueden instalar el paquete `eslint` de manera global haciendo uso de
+`npm`:
+
+```bash
+[~/theory-examples()]$npm install -g eslint
+
+changed 110 packages, and audited 111 packages in 8s
+
+13 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+[~/theory-examples()]$eslint --version
+v7.20.0
+```
+
+A continuación, debemos crear un fichero de configuración de ESLint en base a una serie de
+preguntas que nos va a ir realizando el script de inicialización del comando `eslint`:
+
+```bash
+[~/theory-examples()]$eslint --init
+✔ How would you like to use ESLint? · style
+✔ What type of modules does your project use? · commonjs
+✔ Which framework does your project use? · none
+✔ Does your project use TypeScript? · No / Yes
+✔ Where does your code run? · browser
+✔ How would you like to define a style for your project? · guide
+✔ Which style guide do you want to follow? · google
+✔ What format do you want your config file to be in? · JSON
+Checking peerDependencies of eslint-config-google@latest
+Local ESLint installation not found.
+The config that you've selected requires the following dependencies:
+
+@typescript-eslint/eslint-plugin@latest eslint-config-google@latest eslint@>=5.16.0 @typescript-eslint/parser@latest
+✔ Would you like to install them now with npm? · No / Yes
+Installing @typescript-eslint/eslint-plugin@latest, eslint-config-google@latest, eslint@>=5.16.0, @typescript-eslint/parser@latest
+
+added 134 packages, and audited 156 packages in 12s
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+Successfully created .eslintrc.json file in /home/usuario/theory-examples
+ESLint was installed locally. We recommend using this local copy instead of your globally-installed copy
+```
+
+El fichero de configuración de ESLint se encontrará en la raíz de nuestro proyecto con el nombre `.eslintrc.json`,
+siempre y cuando hayamos elegido volcarlo en un fichero JSON durante el script de inicialización.
+
+Si llegamos a instalar en una de nuestras prácticas anteriores la extensión de ESLint en VSCode, la integración con
+dicho entorno de desarrollo será total una vez instalado el paquete `eslint` y llevada a cabo la configuración
+correspondiente. No obstante, en algunos casos, VSCode podría pedirnos que habilitemos el uso de ESLint en nuestro
+proyecto. Si queremos aprovechar la funcionalidad que otorga, deberemos acceder a habilitarlo.
+
+Una vez habilitado, podremos comprobar que la instalación y configuración de ESLint ha sido adecuada, abriendo el
+fichero `src/index.ts` en VSCode. Si, por ejemplo, se especificó la guía de estilo de Google, ESLint informará
+de un problema con la cadena de caracteres `"Hola Mundo"`. El error, en concreto, se encuentra asociado a una regla
+denominada `"quotes"`, que indica que las cadenas de caracteres deben delimitarse entre comillas simples y no dobles.
+
+Si queremos solucionar el problema detectado, podremos hacer clic en el icono de la bombilla que aparece cuando
+hacemos clic sobre la cadena de caracteres y elegir alguna de las propuestas sugeridas como, por ejemplo, sustituir
+las comillas dobles por comillas simples o desactivar la regla en esa sentencia de código concreta, entre otras.
+
+Por último, para desactivar una regla en ESLint, en general, debemos editar el fichero de configuración
+`.eslintrc.json`, en concreto, la propiedad denominada `"rules"`. Por ejemplo, para desactivar la regla
+`"quotes"`, deberemos incluir lo siguiente en la propiedad anteriormente mencionada:
+
+```bash
+[~/theory-examples()]$cat .eslintrc.json 
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": [
+        "google"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 12
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "quotes": "off"
+    }
+}
+```
+
+Para cada regla, además del valor `"off"`, que permite desactivarla, también se pueden usar los valores
+`"warn"` y `"error"`, que permiten definir el nivel de severidad de la regla en caso de estar habilitada.
+Se vuelven a echar un vistazo al fichero `src/index.ts`, podrán observar como ahora ESLint no informa sobre
+problemas con las cadenas de caracteres con comillas dobles.
