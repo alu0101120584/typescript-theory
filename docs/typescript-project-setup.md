@@ -181,7 +181,7 @@ preguntas que nos va a ir realizando el script de inicialización del comando `e
 ✔ What format do you want your config file to be in? · JSON
 Checking peerDependencies of eslint-config-google@latest
 Local ESLint installation not found.
-The config that you've selected requires the following dependencies:
+The config that you have selected requires the following dependencies:
 
 @typescript-eslint/eslint-plugin@latest eslint-config-google@latest eslint@>=5.16.0 @typescript-eslint/parser@latest
 ✔ Would you like to install them now with npm? · No / Yes
