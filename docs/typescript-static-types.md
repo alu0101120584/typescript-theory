@@ -86,7 +86,7 @@ function add(firstNum: string, secondNum: string) {
 
 const myConst = 7;
 let myResult = add(1, myConst);
-console.log(`myResult = ${myResult}`)
+console.log(`myResult = ${myResult}`);
 ```
 
 El compilador infiere que la constante `myConst` es de tipo `number` debido a la asignación
