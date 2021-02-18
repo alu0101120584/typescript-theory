@@ -312,9 +312,9 @@ src/index.ts(11,22): error TS2339: Property 'charAt' does not exist on type 'str
 ```
 
 La propiedad (método) `toFixed` pertenece al tipo de datos `number`, mientras que la propiedad
-(método) `charAt` pertenece a `string`. Pero ninguna de esas propiedades pertenece a la unión
-de tipos `number | string`, lo que se traduce en que el compilador informe de los errores
-expuestos más arriba.
+(método) `charAt` pertenece al tipo `string`. Sin embargo, ninguna de esas propiedades pertenece
+a la unión de tipos `number | string`, lo que se traduce en que el compilador informe de los
+errores expuestos más arriba.
 
 ## Afirmaciones de tipos
 
