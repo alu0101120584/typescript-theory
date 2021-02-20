@@ -516,5 +516,78 @@ tipos de datos.
 
 ## El tipo de datos unknown
 
+Ya hemos visto anteriormente que el tipo de datos `any` permite acceder a la flexibilidad que
+proporciona JavaScript respecto al tipado de datos dinámico, lo cual puede llevarnos a cometer
+los mismos errores que se cometen al utilizar JavaScript directamente.
 
+El uso del tipo de datos `unknown` es una alternativa más segura al uso de `any`.
+Un valor `unknown` solo puede asignarse a `any` o a si mismo, a no ser que se utilice
+una afirmación o un guardián de tipo, lo que introduce un nivel de comprobación adicional
+respecto a la utilización de `any`:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myResult = add(1, 7, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    let result: never = myResult;
+    console.log(`Type was not expected: ${result}`);
+}
+
+let mySecondResult: unknown = add(1, 7, false);
+let myStringResult:string = mySecondResult;
+console.log(`myStringResult = ${myStringResult}`);
+console.log(`${myStringResult.charAt(0)}`);
+```
+
+El anterior ejemplo hace que el compilador de TypeScript informe del siguiente error:
+
+```bash
+src/index.ts(23,5): error TS2322: Type 'unknown' is not assignable to type 'string'.
+```
+
+Lo cual tendremos que solucionar, por ejemplo, haciendo uso de una afirmación de tipo:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myResult = add(1, 7, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    let result: never = myResult;
+    console.log(`Type was not expected: ${result}`);
+}
+
+let mySecondResult: unknown = add(1, 7, false);
+let myStringResult: string = mySecondResult as string;
+console.log(`myStringResult = ${myStringResult}`);
+console.log(`${myStringResult.charAt(0)}`);
+```
+
+## Tipos de datos null y undefined
 
