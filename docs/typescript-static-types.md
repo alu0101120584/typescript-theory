@@ -323,3 +323,109 @@ errores expuestos más arriba.
 
 ## Afirmaciones de tipos
 
+Una afirmación de tipo o *type assertion* permite indicarle al compilador de TypeScript que trate
+a un valor como de un tipo de datos concreto. Esto se conoce como *type narrowing*.
+
+Una afirmación de tipo es una de las maneras de aplicar *type narrowing* a una unión de tipos:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myNumResult = add(1, 7, true) as number;
+console.log(`myNumResult = ${myNumResult}`);
+console.log(myNumResult.toFixed(2));
+let myStrResult = add(1, 7, false) as string;
+console.log(`myStrResult = ${myStrResult}`);
+console.log(myStrResult.charAt(0));
+```
+
+Hemos especificado que el compilador debe tratar el valor asignado a la variable `myNumResult`
+como un `number`, mientras que debe tratar el valor asignado a la variable `myStrResult` como
+un `string`. Además, el compilador infiere, implícitamente, el tipo de la variable a través
+del tipo utilizado para la afirmación: El siguiente ejemplo es equivalente al anterior:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myNumResult: number = add(1, 7, true) as number;
+console.log(`myNumResult = ${myNumResult}`);
+console.log(myNumResult.toFixed(2));
+let myStrResult: string = add(1, 7, false) as string;
+console.log(`myStrResult = ${myStrResult}`);
+console.log(myStrResult.charAt(0));
+```
+
+Dado que una afirmación de tipo selecciona uno de los tipos de la unión, ahora, en tiempo
+de compilación, todos los métodos y propiedades de dicho tipo están disponibles para ser
+utilizados, evitando los errores que el compilador informaba. Es por ello que, ahora, si
+podemos invocar los métodos `toFixed` y `charAt`.
+
+¿Qué sucedería si tratásemos de utilizar una afirmación de tipo no esperada?
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myNumResult = add(1, 7, true) as number;
+console.log(`myNumResult = ${myNumResult}`);
+console.log(myNumResult.toFixed(2));
+let myStrResult = add(1, 7, false) as string;
+console.log(`myStrResult = ${myStrResult}`);
+console.log(myStrResult.charAt(0));
+let myBoolResult = add(1, 7, false) as boolean;
+console.log(`myBoolResult = ${myBoolResult}`);
+```
+
+Obtenemos el siguiente error:
+
+```bash
+src/index.ts(12,20): error TS2352: Conversion of type 'string | number' to type 'boolean' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'number' is not comparable to type 'boolean'.
+```
+
+Para solucionar lo anterior, lo que suele hacerse es:
+
+1. Utilizar un tipo de datos diferente en la afirmación de tipos que no arroje un error por el compilador.
+2. Ampliar la unión de tipos con un tipo de datos nuevo.
+3. Forzar la afirmación de tipos, utilizando una afirmación al tipo `any` e, inmediatamente, al tipo deseado.
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myNumResult = add(1, 7, true) as number;
+console.log(`myNumResult = ${myNumResult}`);
+console.log(myNumResult.toFixed(2));
+let myStrResult = add(1, 7, false) as string;
+console.log(`myStrResult = ${myStrResult}`);
+console.log(myStrResult.charAt(0));
+let myBoolResult = add(1, 7, false) as any as boolean;
+console.log(`myBoolResult = ${myBoolResult}`);
+
+myBoolResult ? console.log("I am a true value") :
+               console.log("I am a false value");
+```
+
+Lo anterior, en tiempo de compilación, permite evitar que el compilador informe del error que obtuvimos más arriba.
+No obstante y, siempre que utilizamos el tipo `any`, como ya hemos visto anteriormente, debemos asegurarnos de que,
+en tiempo de ejecución, no vaya a producirse ningún error. En tiempo de ejecución, la función `add` devolverá un
+`string` que será asignado a la variable `myBoolResult`, la cual pasará a ser de tipo `string` (tipado dinámico
+de JavaScript). A la hora de utilizar un `string` en una sentencia condicional, solo la cadena vacía se evalúa como
+falsa en JavaScript, mientras que una cadena como la que contiene `myBoolResult` se evaluará como verdadera.
+Es por ello que en la terminal se mostrará el mensaje `"I am a true value"`.
+
+## Guardianes de tipo
+
+Un guardián de tipo o *type guard* implica el uso de `typeof` para averiguar un tipo de datos básico. Es una alternativa
+a la utilización de afirmaciones de tipo.
+
