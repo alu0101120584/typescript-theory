@@ -731,3 +731,89 @@ sentencia `if-else`, la cual es tratada como un guardián de tipos por el compil
 Cabe mencionar en este punto, no obstante, que, al aplicar `typeof` al tipo `undefined`, si que se obtiene
 como respuesta `"undefined"`.
 
+Los tipos `null` y `undefined` no cuentan con ningún método o propiedad, por lo que si los incluimos en una
+unión de tipos, la intersección de propiedades y métodos de los tipos de la unión se encontrará vacía, y no
+podremos utilizar métodos o propiedades, al menos, directamente, de aquellos valores cuyo tipo sea esa unión.
+
+Para evitar lo anterior podremos extraer el tipo `null` de la unión con una afirmación de tipo no nula,
+consistente en utilizar el carácter `!` después del valor para el cual, bajo nuestra responsabilidad,
+afirmaremos que no tomará el valor `null`:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+function div(numerator: number, denominator: number,
+    isNumber: boolean): number | string | null {
+  if (denominator === 0) {
+    return null;
+  }
+  return isNumber ? numerator / denominator :
+                    (numerator / denominator).toFixed(2);
+}
+
+let myResult: number | string = div(4, 6, true)!;
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break
+    ;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    if (myResult === null) {
+      console.log(`myResult = ${myResult}`);
+    } else {
+      let result: never = myResult;
+      console.log(`Type was not expected: ${result}`);
+    }
+}
+```
+
+Se puede observar como a la variable `myResult`, que es de tipo `number | string`, se le puede
+asignar el resultado devuelto por la función `div`, a pesar de que la misma devuelve un valor
+de tipo `number | string | null`. Lo anterior se permite escribiendo el carácter `!` al final
+de la sentencia de declaración y asignación de `myResult`.
+
+Un método alternativo a usar una afirmación no nula es utilizar un guardián de tipos, tal y como
+se ha visto anteriormente:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+function div(numerator: number, denominator: number,
+    isNumber: boolean): number | string | null {
+  if (denominator === 0) {
+    return null;
+  }
+  return isNumber ? numerator / denominator :
+                    (numerator / denominator).toFixed(2);
+}
+
+let myResult: number | string | null = div(4, 6, true);
+
+if (myResult !== null) {
+  let myNonNullResult: number | string = myResult;
+  switch (typeof myNonNullResult) {
+    case "number":
+      console.log(`myNonNullResult = ${myNonNullResult}`);
+      console.log(myNonNullResult.toFixed(2));
+      break;
+    case "string":
+      console.log(`myNonNullResult = ${myResult}`);
+      console.log(myNonNullResult.charAt(0));
+      break;
+  }
+} else {
+  console.log(`myResult = ${myResult}`);
+}
+```
