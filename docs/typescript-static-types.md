@@ -478,7 +478,41 @@ switch (typeof myResult) {
 
 ## El tipo de datos never
 
+TypeScript proporciona el tipo de datos `never` para aquellos casos en los que un guardián de tipos
+ya ha comprobado todos los posibles tipos de datos de un valor concreto. Una vez ha hecho todas
+esas comprobaciones, solo permitirá asignar el tipo `never` a un valor.
 
+En el ejemplo que hemos estado desarrollando, la unión de tipos solo permite los tipos `number` o
+`string` y la sentencia `switch` que utilizamos en el último ejemplo ya se encargó de llevar a cabo
+las comprobaciones con ambos tipos:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myResult = add(1, 7, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    let result: never = myResult;
+    console.log(`Type was not expected: ${result}`);
+}
+```
+
+Alcanzar el caso por defecto de la sentencia `switch` indicaría que ha ocurrido algún tipo de
+error durante la ejecución. TypeScript proporciona el tipo de datos `never` para evitar
+utilizar un valor una vez que se ha utilizado un guardián para comprobar todos sus posibles
+tipos de datos.
 
 ## El tipo de datos unknown
 
