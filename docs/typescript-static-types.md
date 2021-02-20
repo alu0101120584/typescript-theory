@@ -517,13 +517,13 @@ tipos de datos.
 ## El tipo de datos unknown
 
 Ya hemos visto anteriormente que el tipo de datos `any` permite acceder a la flexibilidad que
-proporciona JavaScript respecto al tipado de datos dinámico, lo cual puede llevarnos a cometer
-los mismos errores que se cometen al utilizar JavaScript directamente.
+proporciona JavaScript respecto al tipado de datos dinámico, lo cual también podría llevarnos
+a cometer ciertos errores.
 
 El uso del tipo de datos `unknown` es una alternativa más segura al uso de `any`.
-Un valor `unknown` solo puede asignarse a `any` o a si mismo, a no ser que se utilice
-una afirmación o un guardián de tipo, lo que introduce un nivel de comprobación adicional
-respecto a la utilización de `any`:
+Un valor `unknown` solo puede asignarse al tipo de datos `any` o `unknown`, a no ser que
+se utilice una afirmación o un guardián de tipo, lo que introduce un nivel de
+comprobación adicional respecto a la utilización de `any`:
 
 ```typescript
 function add(firstNum: number, secondNum: number,
@@ -548,18 +548,20 @@ switch (typeof myResult) {
 }
 
 let mySecondResult: unknown = add(1, 7, false);
-let myStringResult:string = mySecondResult;
+let myStringResult: string = mySecondResult;
 console.log(`myStringResult = ${myStringResult}`);
 console.log(`${myStringResult.charAt(0)}`);
 ```
 
-El anterior ejemplo hace que el compilador de TypeScript informe del siguiente error:
+El anterior ejemplo hace que el compilador de TypeScript informe del siguiente error,
+algo que no ocurriría si `mySecondResult` fuera de tipo `any`:
 
 ```bash
 src/index.ts(23,5): error TS2322: Type 'unknown' is not assignable to type 'string'.
 ```
 
-Lo cual tendremos que solucionar, por ejemplo, haciendo uso de una afirmación de tipo:
+El error anterior puede solucionarse, por ejemplo, haciendo uso de una afirmación de tipo
+aplicada sobre `myStringResult`:
 
 ```typescript
 function add(firstNum: number, secondNum: number,
@@ -590,4 +592,142 @@ console.log(`${myStringResult.charAt(0)}`);
 ```
 
 ## Tipos de datos null y undefined
+
+Tal y como se ha mencionado con anterioridad, el valor `null`, que representa algo que no existe o
+que no es válido, solo puede asignarse al tipo `null`. Al mismo tiempo, el valor `undefined`, que
+se usa cuando se ha definido una variable a la que no se ha asignado un valor áun, solo puede
+asignarse al tipo `undefined`.
+
+El compilador de TypeScript, por defecto, permite que los valores `null` y `undefined` puedan asignarse
+a todos los tipos:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+function div(numerator: number, denominator: number,
+    isNumber: boolean): number | string {
+  if (denominator === 0) {
+    return null;
+  }
+  return isNumber ? numerator / denominator :
+                    (numerator / denominator).toFixed(2);
+}
+
+let myResult: number | string = div(1, 0, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    let result: never = myResult;
+    console.log(`Type was not expected: ${result}`);
+}
+```
+
+En el ejemplo anterior se ha añadido una función `div` que devuelve `null` en caso de que
+alguno de los operandos sea negativo. Tal y como puede observarse, el compilador de TypeScript
+no informa de ningún error, a pesar de que se ha indicado explícitamente que el resultado de
+dicha función devuelve una unión de tipos `number | string`. Al mismo tiempo, tampoco informa
+de que a la variable `myResult`, que también se ha anotado explícitamente con el tipo de dicha
+unión, se le puede asignar el valor `null`, resultado de una división por cero.
+
+En tiempo de ejecución, no obstante, el valor devuelto es `null`, lo que hará que la variable
+`myResult` tome el tipo de datos `null`. Más tarde, en la sentencia `switch`, se alcanzará el
+caso por defecto:
+
+```bash
+Type was not expected: null
+```
+
+Para evitar situaciones como las anteriores, el compilador de TypeScript proporciona la opción
+`strictNullChecks`. Si se habilita dicha opción, el compilador no permitirá la asignación de
+los valores `null` y `undefined` a otros tipos que no sean los correspondientes:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  }
+}
+```
+
+Al habilitar dicha opción en el fichero `tsconfig.json` e intentar recompilar el ejemplo anterior,
+el compilador informará del siguiente error:
+
+```bash
+src/index.ts(9,5): error TS2322: Type 'null' is not assignable to type 'string | number'.
+```
+
+Para solucionarlo, podríamos modificar el cuerpo de la función para evitar que la misma devuelva el
+valor `null`, o podemos ampliar la unión de tipos utilizada para anotar el tipo del resultado de la
+función `div`, indicando que el tipo `null` también forma parte de dicha unión:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+function div(numerator: number, denominator: number,
+    isNumber: boolean): number | string | null {
+  if (denominator === 0) {
+    return null;
+  }
+  return isNumber ? numerator / denominator :
+                    (numerator / denominator).toFixed(2);
+}
+
+let myResult: number | string | null = div(1, 0, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+  default:
+    if (myResult === null) {
+      console.log(`myResult = ${myResult}`);
+    } else {
+      let result: never = myResult;
+      console.log(`Type was not expected: ${result}`);
+    }
+}
+```
+
+No solo se debe modificar la anotación en la función, sino también en la declaración de la variable
+`myResult`. Por último, debemos tener en cuenta también la posibilidad de obtener un valor `null` en
+el guardián de tipos. La pregunta que podrían hacerse ahora mismo es ¿por qué no utilizar otro
+`case` en dicho guardián para comprobar si `myResult` es de tipo `null`. Modifiquemos el ejemplo anterior
+para incluir lo siguiente:
+
+```typescript
+let myResult: number | string | null = div(1, 0, true);
+console.log(`${typeof myResult}`)
+```
+
+Al aplicar `typeof` al tipo `null` se obtiene como respuesta `"object"`. Es por ello que no se puede utilizar
+otra sentencia `case` dentro del `switch` que haga referencia al tipo de datos `null`. Lo que se debe hacer
+es comprobar explícitamente si el valor obtenido de la ejecución de la función `div` es `null` dentro de una
+sentencia `if-else`, la cual es tratada como un guardián de tipos por el compilador de TypeScript.
+
+Cabe mencionar en este punto, no obstante, que, al aplicar `typeof` al tipo `undefined`, si que se obtiene
+como respuesta `"undefined"`.
 
