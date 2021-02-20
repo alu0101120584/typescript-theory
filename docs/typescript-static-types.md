@@ -426,6 +426,61 @@ Es por ello que en la terminal se mostrará el mensaje `"I am a true value"`.
 
 ## Guardianes de tipo
 
-Un guardián de tipo o *type guard* implica el uso de `typeof` para averiguar un tipo de datos básico. Es una alternativa
-a la utilización de afirmaciones de tipo.
+Un guardián de tipo o *type guard* implica el uso de `typeof` para averiguar un tipo de datos, que tiene que ser
+uno de los tipos básicos de JavaScript. Es una alternativa a la utilización de afirmaciones de tipo:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myResult = add(1, 7, true);
+
+if (typeof myResult === "number") {
+  console.log(`myResult = ${myResult}`);
+  console.log(myResult.toFixed(2));
+} else if (typeof myResult === "string") {
+  console.log(`myResult = ${myResult}`);
+  console.log(myResult.charAt(0));
+}
+```
+
+En tiempo de ejecución, `myResult` recibirá un valor de tipo `number`, y dicha variable pasará a ser
+de ese tipo también. El guardián de tipo establecido a través del uso de `typeof` permitirá bifurcar
+el flujo de ejecución correctamente. Además, el compilador de TypeScript no informará de ningún error
+dado que confía en que las sentencias de un bloque condicional concreto solo se ejecutarán si el valor
+comprobado es del tipo especificado en la condición. Es por ello que también podemos invocar al método
+`toFixed` dentro del primer bloque condicional y al método `charAt` dentro del segundo bloque condicional.
+
+El compilador de TypeScript también es capaz de detectar guardianes de tipo en sentencias `switch` y no
+solo en sentencias `if-else`:
+
+```typescript
+function add(firstNum: number, secondNum: number,
+    isNumber: boolean): number | string {
+  return isNumber ? firstNum + secondNum : (firstNum + secondNum).toFixed(2);
+}
+
+let myResult = add(1, 7, true);
+
+switch (typeof myResult) {
+  case "number":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.toFixed(2));
+    break;
+  case "string":
+    console.log(`myResult = ${myResult}`);
+    console.log(myResult.charAt(0));
+    break;
+}
+```
+
+## El tipo de datos never
+
+
+
+## El tipo de datos unknown
+
+
 
