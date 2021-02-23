@@ -74,8 +74,9 @@ src/index.ts(1,10): error TS2393: Duplicate function implementation.
 src/index.ts(5,10): error TS2393: Duplicate function implementation.
 ```
 
-Por lo tanto, para evitar este tipo de errores, se puede combinar la funcionalidad de las funciones en una única
-función o se puede asignar nombres diferentes a las funciones. El siguiente ejemplo ilustra la segunda opción:
+Por lo tanto, para evitar este tipo de errores, se puede combinar la funcionalidad de las funciones del mismo
+nombre en una única función o se pueden asignar nombres diferentes a las funciones. El siguiente ejemplo
+ilustra la segunda opción:
 
 ```typescript
 function addTwoNumbers(firstNum, secondNum) {
@@ -90,6 +91,118 @@ let mySum = addTwoNumbers(1, 7);
 console.log(`mySum = ${mySum}`);
 
 mySum = addThreeNumbers(1, 7, 15);
-console.log(`mySum = ${mySum}`)
+console.log(`mySum = ${mySum}`);
 ```
+
+# Número de parámetros y argumentos
+
+Anteriormente se indicó que el número de argumentos en JavaScript a la hora de invocar una función
+no es determinante. Sin embargo, TypeScript espera que una función se invoque con un número de argumentos
+igual al número de parámetros especificados en la definición de la función. Si modificamos el ejemplo
+anterior:
+
+```typescript
+function addTwoNumbers(firstNum, secondNum) {
+  return firstNum + secondNum;
+}
+
+function addThreeNumbers(firstNum, secondNum, thirdNum) {
+  return firstNum + secondNum + thirdNum;
+}
+
+let mySum = addTwoNumbers(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = addThreeNumbers(1, 7);
+console.log(`mySum = ${mySum}`);
+```
+
+El compilador de TypeScript informa de los siguientes errores:
+
+```bash
+src/index.ts(9,33): error TS2554: Expected 2 arguments, but got 3.
+src/index.ts(12,9): error TS2554: Expected 3 arguments, but got 2.
+```
+
+Indicando que la invocación a la primera función esperaba dos argumentos pero ha sido invocada con tres,
+al mismo tiempo que la invocación a la segunda función esperaba tres argumentos pero ha sido invocada con dos.
+
+# Parámetros opcionales
+
+Para introducir un poco de flexibilidad en lo que respecta a la coincidencia del número de parámetros y de
+argumentos de una función, TypeScript permite indicar que un parámetro sea opcional. Los parámetros opcionales
+siempre se deben definir después de los parámetros obligatorios:
+
+```typescript
+function add(firstNum, secondNum, thirdNum?) {
+  return firstNum + secondNum + (thirdNum || 0);
+}
+
+let mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+```
+
+Tal y como puede observarse, hemos unificado la funcionalidad de las dos funciones utilizadas en ejemplos anteriores
+en una sola, indicando que el parámetro `thirdNum` es opcional añadiendo el caracter `?` después de su nombre.
+Una vez dentro de la función, si el valor de `thirdNum` está definido, se utilizará para calcular la suma. En caso
+contrario, si es `undefined`, se sumará el valor cero. Si modifica el ejemplo anterior para que el segundo parámetro
+sea opcional, en lugar del tercero:
+
+```typescript
+function add(firstNum, secondNum?, thirdNum) {
+  return firstNum + secondNum + (thirdNum || 0);
+}
+
+let mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+```
+
+El compilador de TypeScript informará de los siguientes errores:
+
+```bash
+src/index.ts(1,36): error TS1016: A required parameter cannot follow an optional parameter.
+src/index.ts(5,13): error TS2554: Expected 3 arguments, but got 2.
+```
+
+## Valores por defecto
+
+En el ejemplo anterior hemos definido un parámetro como opcional, que ha implicado tener que introducir
+cierta lógica en la función `add` para actuar en consecuencia de que el argumento correspondiente a dicho
+parámetro opcional no se especifique en la invocación de la función, es decir, que el valor de ese
+argumento sea `undefined`.
+
+En ese ejemplo concreto, la introducción de esa lógica adicional podría evitarse haciendo uso de un valor
+por defecto que toma el argumento en caso de que no se especifique dicho valor, de manera explícita,
+durante la invocación de la función:
+
+```typescript
+function add(firstNum, secondNum, thirdNum = 0) {
+  return firstNum + secondNum + thirdNum;
+}
+
+let mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+```
+
+En el ejemplo anterior, el parámetro `thirdNum` se inicializa por defecto al valor cero. Para definir un valor
+por defecto de un parámetro se debe utilizar el carácter `=` seguido de dicho valor por defecto. De este modo, la
+función `add` se puede invocar con dos o tres argumentos. En el primer caso, se utilizará el valor cero para llevar
+a cabo la suma y, tal y como se comentó anteriormente, se ha podido eliminar del cuerpo de la función toda la lógica
+utilizada para comprobar posibles valores `undefined`.
+
+Cabe mencionar en este punto que un parámetro inicializado por defecto sigue siendo un parámetro opcional y,
+por lo tanto, debe definirse después de los parámetros obligatorios.
+
+## Parámetros *rest*
+
+
 
