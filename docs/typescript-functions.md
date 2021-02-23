@@ -170,7 +170,7 @@ src/index.ts(1,36): error TS1016: A required parameter cannot follow an optional
 src/index.ts(5,13): error TS2554: Expected 3 arguments, but got 2.
 ```
 
-## Valores por defecto
+## Parámetros con valores por defecto
 
 En el ejemplo anterior hemos definido un parámetro como opcional, que ha implicado tener que introducir
 cierta lógica en la función `add` para actuar en consecuencia de que el argumento correspondiente a dicho
@@ -204,5 +204,36 @@ por lo tanto, debe definirse después de los parámetros obligatorios.
 
 ## Parámetros *rest*
 
+Mediante un *parámetro rest*, una función puede recibir un número variable de argumentos. Una función solo puede tener
+un único parámetro rest y sus argumentos se agrupan en un array:
 
+```typescript
+function add(firstNum, secondNum = 0, ...remainingNums) {
+  return firstNum + secondNum +
+         remainingNums.reduce((total, value) => total + value, 0);
+}
 
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+```
+
+Se puede observar como el parámetro rest `remainingNums` viene precedido de una elipsis, esto es, `...`.
+El array de argumentos apuntado por dicho parámetro siempre se inicializa y puede llegar a no contener
+ningún valor, en el caso de que el parámetro rest no se utilice, como en el caso de la primera y segunda
+invocaciones de la función `add` del ejemplo anterior. En dicho ejemplo, la función `add` debe invocarse,
+al menos, con un argumento, el correspondiente al parámetro obligatorio `firstNum`. El segundo parámetro
+`secondNum` es opcional, dado que recibe el valor cero por defecto. Los restantes argumentos con los que
+se invoca la función van agrupados en el parámetro rest. Por último, cabe mencionar que el parámetro rest
+de una función se debe definir después de los parámetros opcionales, que a su vez, se deben definir después
+de los parámetros obligatorios.
+
+## 
