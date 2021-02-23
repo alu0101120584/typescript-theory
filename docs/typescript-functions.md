@@ -94,7 +94,7 @@ mySum = addThreeNumbers(1, 7, 15);
 console.log(`mySum = ${mySum}`);
 ```
 
-# Número de parámetros y argumentos
+## Número de parámetros y argumentos
 
 Anteriormente se indicó que el número de argumentos en JavaScript a la hora de invocar una función
 no es determinante. Sin embargo, TypeScript espera que una función se invoque con un número de argumentos
@@ -127,7 +127,7 @@ src/index.ts(12,9): error TS2554: Expected 3 arguments, but got 2.
 Indicando que la invocación a la primera función esperaba dos argumentos pero ha sido invocada con tres,
 al mismo tiempo que la invocación a la segunda función esperaba tres argumentos pero ha sido invocada con dos.
 
-# Parámetros opcionales
+## Parámetros opcionales
 
 Para introducir un poco de flexibilidad en lo que respecta a la coincidencia del número de parámetros y de
 argumentos de una función, TypeScript permite indicar que un parámetro sea opcional. Los parámetros opcionales
