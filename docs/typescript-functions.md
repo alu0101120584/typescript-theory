@@ -236,4 +236,299 @@ se invoca la función van agrupados en el parámetro rest. Por último, cabe men
 de una función se debe definir después de los parámetros opcionales, que a su vez, se deben definir después
 de los parámetros obligatorios.
 
-## 
+## Anotaciones de tipo en los parámetros de una función
+
+Si analizamos el contenido del fichero `index.d.ts` disponible en el directorio `dist/` del proyecto, podremos
+observar como el compilador de TypeScript ha inferido que todos los parámetros de la función `add`, además de
+su resultado, son de tipo `any`, a excepción del parámetro `secondNum`, cuyo valor por defecto es cero y, por
+lo tanto, su tipo inferido es `number`. El tipo inferido para la variable `mySum` también es `any`.
+
+Todos los parámetros de la función `add` pueden ser anotados con tipos de manera explícita, tal y como se
+muestra en el siguiente ejemplo:
+
+```typescript
+function add(firstNum: number, secondNum: number = 0,
+    ...remainingNums: number[]) {
+  return firstNum + secondNum +
+         remainingNums.reduce((total, value) => total + value, 0);
+}
+
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+```
+
+Cabe mencionar que, en el caso del parámetro rest, su tipo siempre debe ser un array, en nuestro caso,
+un array con valores numéricos: `number[]`. Por último, la anotación de tipo de un parámetro opcional
+debe llevarse a cabo después del carácter `?`.
+
+## Parámetros cuyos argumentos son nulos 
+
+Tal y como se indicó en el apartado anterior, TypeScript permite que `null` y `undefined` puedan
+utilizarse como valores asignables a todos los tipos, por defecto. Lo anterior significa que una
+función puede invocarse haciendo uso de valores `null` en todos sus argumentos.
+
+Si el valor nulo se utiliza como argumento de un parámetro inicializado por defecto, se omite el valor
+nulo y se utiliza el valor por defecto. Sin embargo, con parámetros obligatorios, `null` se utilizará
+en la función, lo que puede llevar a resultados inesperados en tiempo de ejecución:
+
+```typescript
+function add(firstNum: number, secondNum: number = 0,
+    ...remainingNums: number[]) {
+  return firstNum + secondNum +
+         remainingNums.reduce((total, value) => total + value, 0);
+}
+
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(null, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+```
+
+En la última invocación a `add` se puede observar como el único parámetro obligatorio, el primero,
+recibe como argumento `null`. El compilador de TypeScript, por defecto, no informa de ningún error,
+dado que el valor `null` es asignable a cualquier tipo, en este caso, a `number`. Una vez dentro de
+la función, en tiempo de ejecución, el valor `null` se transforma al valor numérico cero, haciendo
+que el resultado devuelto por la función sea el número 48.
+
+Para evitar que se pueda invocar una función con valores nulos, podemos habilitar la opción
+`strictNullChecks` en el fichero `tsconfig.json` de opciones del compilador de TypeScript:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strictNullChecks": true
+  }
+}
+```
+
+Lo anterior hará que, tras volver a intentar compilar nuestro ejemplo, el compilador de TypeScript
+emita el siguiente error:
+
+```bash
+src/index.ts(16,13): error TS2345: Argument of type 'null' is not assignable to parameter of type 'number'.
+```
+
+Imaginemos, no obstante, que deseamos que un parámetro concreto de una función pueda recibir `null` como
+argumento. En ese caso, podemos utilizar una unión de tipos:
+
+```typescript
+function add(firstNum: number | null, secondNum: number = 0,
+    ...remainingNums: number[]) {
+  if (firstNum !== null) {
+    return firstNum + secondNum +
+           remainingNums.reduce((total, value) => total + value, 0);
+  }
+}
+
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(null);
+console.log(`mySum = ${mySum}`);
+```
+
+Para evitar un aviso del compilador, además, también debemos utilizar un guardián de tipos dentro del cuerpo
+de la función. La función, en caso de ser invocada sin un argumento `null` para el primer parámetro, 
+devolverá un valor numérico. En caso de que se utilice `null` como argumento del primer parámetro, devolverá `undefined`.
+
+## Resultado de una función
+
+Si se analiza el contenido del fichero `dist/index.d.ts` para el ejemplo anterior, se podrá observar como
+TypeScript ha inferido que el resultado de la función `add` tiene como tipo la unión de tipos `number | undefined`.
+
+Lo anterior se debe a que, por defecto, todo camino en el flujo de ejecución de una función para el que no se
+alcance una sentencia `return`, devolverá `undefined`. Es por ello que, en el ejemplo anterior, al invocar `add`
+con un argumento `null` para el primer parámetro, se evita el flujo de ejecución del condicional, y al no existir
+una sentencia `return` fuera de dicho bloque condicional, la función devuelve `undefined`.
+
+Para evitar este comportamiento, se puede habilitar la opción `noImplicitReturns` en el fichero de configuración
+del compilador de TypeScript:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strictNullChecks": true,
+    "noImplicitReturns": true
+  }
+}
+```
+
+Tras habilitar dicha opción en el compilador, al tratar de recompilar el último ejemplo, veremos como el compilador
+nos informa de lo siguiente:
+
+```bash
+src/index.ts(1,10): error TS7030: Not all code paths return a value.
+```
+
+Lo cual podremos solucionar, por ejemplo, de la siguiente manera:
+
+```typescript
+function add(firstNum: number | null, secondNum: number = 0,
+    ...remainingNums: number[]) {
+  if (firstNum !== null) {
+    return firstNum + secondNum +
+           remainingNums.reduce((total, value) => total + value, 0);
+  }
+  return 0;
+}
+
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(null);
+console.log(`mySum = ${mySum}`);
+```
+
+## Anotaciones de tipo en el resultado de una función
+
+El compilador de TypeScript es capaz de inferir el tipo del resultado devuelto por una función
+llevando a cabo un análisis de los diferentes caminos que puede tomar el flujo de ejecución de
+una función. Sin embargo, se pueden utilizar anotaciones de tipo explícitas para el resultado
+de una función:
+
+```typescript
+function add(firstNum: number | null, secondNum: number = 0,
+    ...remainingNums: number[]): number {
+  if (firstNum !== null) {
+    return firstNum + secondNum +
+           remainingNums.reduce((total, value) => total + value, 0);
+  }
+  return 0;
+}
+
+let mySum = add(1);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(1, 7, 8, 10, 23);
+console.log(`mySum = ${mySum}`);
+
+mySum = add(null);
+console.log(`mySum = ${mySum}`);
+```
+
+Si por ejemplo, sustituimos la sentencia `return 0` por la sentencia `return null`, el compilador
+de TypeScript indicará lo siguiente:
+
+```bash
+src/index.ts(7,3): error TS2322: Type 'null' is not assignable to type 'number'.
+```
+
+El compilador no habría informado del anterior error si no hubiéramos anotado explícitamente el
+tipo del resultado de la función `add`. Por ello, es una buena práctica anotar el tipo que devuelve
+una función, con el objetivo de evitar posibles errores a la hora de devolver valores de tipos no
+deseados en los diferentes caminos del flujo de ejecución de una función.
+
+## Uso de void como resultado de una función
+
+Se pueden definir funciones que no devuelvan ningún valor, haciendo uso del tipo `void` en la
+anotación de tipo del resultado de una función:
+
+```typescript
+function add(firstNum: number | null, secondNum: number = 0,
+    ...remainingNums: number[]): number {
+  if (firstNum !== null) {
+    return firstNum + secondNum +
+           remainingNums.reduce((total, value) => total + value, 0);
+  }
+  return 0;
+}
+
+function printNumber(myNum: number): void {
+  console.log(`Number = ${myNum}`);
+}
+
+let mySum = add(1);
+printNumber(mySum);
+
+mySum = add(1, 7);
+printNumber(mySum);
+
+mySum = add(1, 7, 8);
+printNumber(mySum);
+
+mySum = add(1, 7, 8, 10, 23);
+printNumber(mySum);
+
+mySum = add(null);
+printNumber(mySum);
+```
+
+Se puede observar como el resultado de la función `printNumber` se ha anotado con el tipo `void`.
+Esto permite evitar que una función que devuelve `void` contenga una sentencia `return`:
+
+```typescript
+function printNumber(myNum: number): void {
+  console.log(`Number = ${myNum}`);
+  return 0;
+}
+```
+
+El compilador informa de lo siguiente en el caso anterior:
+
+```bash
+src/index.ts(12,3): error TS2322: Type 'number' is not assignable to type 'void'.
+```
+
+Sin embargo, si consideremos el siguiente ejemplo:
+
+```typescript
+function printNumber(myNum: number): void {
+  console.log(`Number = ${myNum}`);
+  return undefined;
+}
+```
+
+El compilador de TypeScript no emitirá un mensaje de error. Lo anterior se debe a que si intentamos
+asignar el resultado de la invocación de una función cuyo resultado es de tipo `void` a, por ejemplo,
+una variable o constante, dicha variable o constante tomará el valor `undefined` (se ha declarado,
+pero como es lógico, no se le ha asignado ningún valor). El hecho de añadir explícitamente
+`return undefined` en el cuerpo de una función cuyo resultado es de tipo `void` no modificará el
+comportamiento implícito descrito anteriormente.
